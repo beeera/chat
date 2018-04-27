@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      #messages { margin-bottom: 40px }
+    </style>
+  </head>
+  <body>
+    <h1 id="roomHolder"></h1>
+    <h2 id="nameHolder"></h2>
+
+    <ul id="messages"></ul>
+
+    <form id="person">
+      Room: <select id="room"><option value="room1">Room 1</option><option value="room2">Room 2</option></select>
+      Name: <input id="name" /> <button>Set nick</button>
+    </form>
+
+    <form id="chat" action="">
+      <input id="m" autocomplete="off" /> <button>Send</button>
+    </form>
+
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+    <script>
+      $(function () {
+
+          var socket = io();
+
+        $('#person').submit(function(){
+
+            var person = $('#name').val();
+            var room = $('#room').val();
+
+            $('#nameHolder').html(person);
+            socket.emit('choose-room', {room, person})
+
+
+            socket.on('chat message', function(msg){
+                $('#messages').append($('<li>').text(msg.person + ': ' + msg.msg));
+                window.scrollTo(0, document.body.scrollHeight);
+            });
+
+            socket.on('ping', () => {
+                console.log('ping2');
+            });
+
+            return false;
+        });
+
+        $('#chat').submit(function(){
+            socket.emit('chat message', $('#m').val(), $('#nameHolder').html(), $('#room').val());
+            $('#m').val('');
+            return false;
+        });
+
+
+      });
+    </script>
+  </body>
+</html>
